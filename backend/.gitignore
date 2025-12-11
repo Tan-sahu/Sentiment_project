@@ -1,0 +1,7 @@
+# Security
+.env
+
+# Virtual Environment & Python junk
+venv/
+__pycache__/
+*.pyc
