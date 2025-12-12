@@ -1,26 +1,22 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+# database.py
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
-app = FastAPI()
+SQLALCHEMY_DATABASE_URL = "sqlite:///./sql_app.db"
+# For PostgreSQL use: "postgresql://user:password@localhost/dbname"
 
-# Allow React (usually running on localhost:5173) to access the backend
-origins = [
-    "http://localhost:5173",
-    "http://localhost:3000",
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
 )
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-@app.get("/")
-def read_root():
-    return {"message": "Hello from FastAPI"}
+Base = declarative_base()
 
-@app.get("/api/data")
-def get_data():
-    return {"data": [1, 2, 3, 4, 5], "status": "success"}
+# Dependency to use in routes
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
